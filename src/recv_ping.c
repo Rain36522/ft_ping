@@ -31,26 +31,25 @@ int	ft_type3(int icode)
 	else if (icode == 12)
 		ft_putstr_fd("host administrativly prohibited", 1);
 	printf("!%s", RESETN);
+	return (0);
 }
 
-int	ft_echo_reply(struct icmphdr *icmpheader, t_result *result, int len, struct iphdr *iphdr)
+int	ft_echo_reply(struct icmphdr *icmpheader, t_result *result, int len, struct iphdr *iphdr, double start)
 {
-	unsigned int    stop;
-    uint32_t        start;
     int             sequence;
     struct in_addr  addr;
     char            ip[15];
 
+	(void) result;
 
-    stop = ft_get_time_us();
-    start = ntohl(icmpheader->un.echo.sequence);
     sequence = ntohs(icmpheader->un.echo.sequence);
 	addr.s_addr = iphdr->saddr;
     inet_ntop(AF_INET, &addr, ip, sizeof(ip));
-    printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%2.f ms\n", len, ip, sequence, iphdr->ttl)
+    printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", len, ip, sequence, iphdr->ttl, get_time_ms() - start);
+	return (1);
 }
 
-static void ft_read_msg(t_result *result, char *buffer, int len)
+static int ft_read_msg(t_result *result, char *buffer, int len, int argv, double start_time)
 {
 	struct icmphdr	*icmpheader;
 	struct iphdr	*iphdr;
@@ -59,6 +58,7 @@ static void ft_read_msg(t_result *result, char *buffer, int len)
 	iphdr = (struct iphdr *)buffer;
 	icmpheader = (struct icmphdr *)(buffer + (iphdr->ihl * 4));
 	type = icmpheader->type;
+	result_ptr = ft_add_chainlink(result_ptr, ntohs(icmpheader->un.echo.sequence), get_time_ms() - start_time, type);
 	if (type == 3)
 		ft_type3(icmpheader->code);
 	else if (type == 4)
@@ -70,41 +70,48 @@ static void ft_read_msg(t_result *result, char *buffer, int len)
 	else if (type == 12)
 		printf("%sParametre problem%s", YELLOW, RESETN);
 	else if (type == 8)
-		printf("%sEcho request!%s", YELLOW, RESETN);
-	else if (type == 0)
 	{
-		printf("%sEcho reply!%s", GREEN, RESETN);
-		return (ft_echo_reply(icmpheader, &result, len, iphdr));
+		if (argv)
+			printf("%sEcho request!%s", YELLOW, RESETN);
+		return (0);
 	}
+	else if (type == 0)
+		return (ft_echo_reply(icmpheader, result, len, iphdr, start_time));
 	else
 		printf("%sUnknow echo request!%s", ORANGE, RESETN);
-	return (0);
+	return (1);
 }
 
-void	ft_recv_ping(int socketfd, t_result *result, int argv)
+void	ft_recv_ping(int socketfd, t_result *result, int argv, double start_time)
 {
-	char				buffer[1024];
+	char				buffer[4096];
 	struct msghdr		msg;
 	struct iovec		iov;
 	struct sockaddr_in	src_addr;
-	struct timeval		stop_time;
-	struct timeval		start_time;
+	int					read_result;
     int                 len;
 
-	iov.iov_base = buffer;
-	iov.iov_len = sizeof(buffer);
+	ft_bzero(&buffer, sizeof(buffer));
+    ft_bzero(&iov, sizeof(iov));
+    ft_bzero(&msg, sizeof(msg));
 
-	msg.msg_name = &src_addr;
-	msg.msg_namelen = sizeof(src_addr);
-	msg.msg_iov = &iov;
-	msg.msg_control = NULL;
-	msg.msg_controllen = 0;
+    iov.iov_base = buffer;
+    iov.iov_len = sizeof(buffer);
+    msg.msg_name = &src_addr;
+    msg.msg_namelen = sizeof(src_addr);
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = NULL;
+    msg.msg_controllen = 0;
 	msg.msg_flags = 0;
-	while (!len)
-		printf("Waiting for messae!\n");
+	len = 0;
+	read_result = 0;
+	while (len == 0 || read_result == 0)
+	{
 		len = recvmsg(socketfd, &msg, 0);
 		if (len < 0)
-			fprintf(stderr, "%sEroor while reading request!%s", ORANGE, RESETN);
+			fprintf(stderr, "%sError while reading request!%s", ORANGE, RESETN);
 		else if (len > 0)
-			ft_read_msg(result, buffer, len);
+			read_result = ft_read_msg(result, buffer, len, argv, start_time);
+	}
 }

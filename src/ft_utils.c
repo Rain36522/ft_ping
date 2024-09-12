@@ -3,24 +3,33 @@
 /*                                                        :::      ::::::::   */
 /*   ft_utils.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: pudry <pudry@student.42.fr>                +#+  +:+       +#+        */
+/*   By: pudry <pudry@student.42lausanne.ch>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/29 15:16:54 by pudry             #+#    #+#             */
-/*   Updated: 2024/08/28 17:06:25 by pudry            ###   ########.fr       */
+/*   Created: 2024/09/04 15:00:37 by pudry             #+#    #+#             */
+/*   Updated: 2024/09/04 15:01:49 by pudry            ###   ########.ch       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ping.h"
 
-unsigned int    ft_get_time_us(void)
+double	get_time_ms(void)
 {
-	struct timeval      tv;
-	static long unsigned int   sec_offset;
+	struct timeval		time;
+	unsigned long long	ltime;
 
-	gettimeofday(&tv, NULL);
-	if (!sec_offset)
-		sec_offset = (long unsigned int)tv.tv_sec;
-	return (tv.tv_sec - sec_offset + tv.tv_usec);
+	gettimeofday(&time, NULL);
+	ltime = time.tv_sec * 1000000 + time.tv_usec;
+	return (ltime / 1000.0);
+}
+
+void	sig_handler(int sig)
+{
+	if (sig != 2)
+		return;
+	write(1, "\n", 1);
+	ft_print_stat(result_ptr);
+	close(socketfd);
+	exit(0);
 }
 
 void	ft_exit(char *color, char *str, int i)

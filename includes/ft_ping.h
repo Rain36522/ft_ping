@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: pudry <pudry@student.42lausanne.ch>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/12 12:12:28 by pudry             #+#    #+#             */
-/*   Updated: 2024/07/12 12:12:35 by pudry            ###   ########.ch       */
+/*   Created: 2024/09/04 14:57:00 by pudry             #+#    #+#             */
+/*   Updated: 2024/09/04 14:57:00 by pudry            ###   ########.ch       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/ip_icmp.h>
-#include <errno.h>
 #include <signal.h>
 #include "../libft/includes/libft.h"
 
@@ -43,37 +42,41 @@
 #define NOBOLD	"\033[0m"
 #define DEBUG printf("\033[31m %s, %d, %s", __FILE__, __LINE__, "\033[0m\n");
 
-
-extern int socketfd;
-
 typedef struct s_argv {
     uint32_t    binip;
     int         icycle;
     int         flagv;
+    char        *strip;
 } t_argv;
 
 typedef struct s_result {
-    double          mint;
-    double          maxt;
-    double          averaget;
-    unsigned int    reponse;
+    double              time;
+    int                 id;
+    int                 icmptype;
+    struct s_result    *next;
 } t_result;
 
-typedef struct s_pingData {
-    unsigned int    time;
-    char            addr_ip[16];
-    int             sequence;
-    int             ttl;
-};
+extern int      socketfd;
+extern t_result *result_ptr;
+extern int      send_packet;
+extern double   prog_start_time;
+extern t_argv   strctargv;
+
+
 
 void    ft_exit(char *color, char *str, int i);
 void	ft_exit_fd(char *color, char *str, int fd, int i);
+void	sig_handler(int sig);
 
 t_argv  ft_parsing(int argc, char **argv);
 
-void    ft_ping(int quantity, char *ipTarget);
-void    ft_recv_ping(int sockfd, struct s_result *results);
+void	ft_ping(uint32_t binip, int argv, int icycle);
+void	ft_recv_ping(int socketfd, t_result *result, int argv, double start_time);
 
 unsigned short  ft_calcul_cksum(void *b, int len);
-unsigned int    ft_get_time_us(void);
+double	        get_time_ms(void);
 
+t_result	*ft_add_chainlink(t_result *ptr, int id, double time, int	icmptype);
+void	    free_list(t_result *ptr);
+
+void    ft_print_stat(t_result *ptr);

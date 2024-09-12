@@ -1,19 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_ping.c                                          :+:      :+:    :+:   */
+/*   ft_ping.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pudry <pudry@student.42lausanne.ch>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/07 11:44:56 by pudry             #+#    #+#             */
-/*   Updated: 2024/08/07 11:44:56 by pudry            ###   ########.ch       */
+/*   Created: 2024/09/04 14:30:56 by pudry             #+#    #+#             */
+/*   Updated: 2024/09/04 14:30:56 by pudry            ###   ########.ch       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "ft_ping.h"
-
-int	socketfd;
 
 static struct sockaddr_in  ft_init_packet(uint32_t ipTarget, struct icmp *icmpHeader)
 {
@@ -22,20 +20,17 @@ static struct sockaddr_in  ft_init_packet(uint32_t ipTarget, struct icmp *icmpHe
 	ft_bzero(&destaddr, sizeof(destaddr));
 	destaddr.sin_family = AF_INET;
 	destaddr.sin_port = 0;
+	destaddr.sin_addr.s_addr = ipTarget;
 	icmpHeader->icmp_type = ICMP_ECHO;
 	icmpHeader->icmp_code = 0;
 	icmpHeader->icmp_id = getpid();
-	icmpHeader->icmp_seq = 1;    
+	icmpHeader->icmp_seq = 1;
 	return (destaddr);
 }
 
 
 static void ft_gen_packet(struct icmp *icmpHeader, char *packet)
 {
-	unsigned int	timestamp;
-
-	timestamp = ft_get_time_us();
-	icmpHeader->icmp_dun.id_ts.its_otime = htonl(timestamp);
 	icmpHeader->icmp_cksum = 0;
 	ft_memcpy(packet, icmpHeader, sizeof(struct icmp));
 	icmpHeader->icmp_cksum = ft_calcul_cksum((unsigned short *)packet, sizeof(struct icmp));
@@ -45,23 +40,29 @@ static void ft_gen_packet(struct icmp *icmpHeader, char *packet)
 t_result	ft_loop_ping(int icycle, struct sockaddr_in destaddr, struct icmp icmpHeader, int argv)
 {
 	int			data;
+	int			sequence;
 	char		packet[64];
+	double		start_time;
 	t_result	result;
 
 	(void)result;
-	while (icmpHeader.icmp_seq <= icycle)
+	printf("Icycle = %d\n", icycle);
+	sequence = 1;
+	while (sequence <= icycle)
 	{
-		printf("<======================================== %d ========================================>\n", icmpHeader.icmp_seq);
+		icmpHeader.icmp_seq = htons(sequence);
 		ft_bzero(&result, sizeof(result));
 		ft_bzero(&packet, sizeof(packet));
 		ft_gen_packet(&icmpHeader, packet);
+		start_time = get_time_ms();
 		data = sendto(socketfd, packet, sizeof(packet), 0, (struct sockaddr *)&destaddr, sizeof(destaddr));
+		send_packet ++;
 		if (data <= 0)
-			printf("Error sending request ...\n");
+			fprintf(stderr, "Error sending request ...\n");
 		else
-			ft_recv_ping(socketfd, &result);
-		sleep(1);
-		icmpHeader.icmp_seq ++;
+			ft_recv_ping(socketfd, &result, argv, start_time);
+		usleep(300000);
+		sequence ++;
 	}
 	return (result);
 }
@@ -76,7 +77,7 @@ void	ft_ping(uint32_t binip, int argv, int icycle)
 	destaddr = ft_init_packet(binip, &icmpHeader);
 	socketfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (socketfd < 0)
-		ft_error(1, "Error opening socket\n");
+		ft_exit(RED, "Error opening socket\n", 1);
 	ft_loop_ping(icycle, destaddr, icmpHeader, argv);
-	// ft_print_result(results);
+	close(socketfd);
 }
