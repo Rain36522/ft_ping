@@ -33,6 +33,7 @@ int main(int argc, char **argv)
 		ft_print_help();
 	else if (getuid() != 0)
 		ft_exit(ORANGE, "The program must be run as root!\n", 1);
+	ft_bzero(&strctargv, sizeof(strctargv));
 	strctargv = ft_parsing(argc, argv);
 	prog_start_time = get_time_ms();
 	setup_signal();

@@ -46,7 +46,6 @@ t_result	ft_loop_ping(int icycle, struct sockaddr_in destaddr, struct icmp icmpH
 	t_result	result;
 
 	(void)result;
-	printf("Icycle = %d\n", icycle);
 	sequence = 1;
 	while (sequence <= icycle)
 	{

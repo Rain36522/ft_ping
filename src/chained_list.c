@@ -19,7 +19,7 @@ t_result	*ft_add_chainlink(t_result *ptr, int id, double time, int	icmptype)
 	t_result    *chainlink;
 	t_result	*mem_ptr;
 
-	chainlink = (t_result *)malloc(sizeof(chainlink));
+	chainlink = (t_result *)malloc(sizeof(t_result));
 	if (!chainlink)
 	{
 		free_list(ptr);

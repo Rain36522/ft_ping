@@ -109,7 +109,6 @@ static t_argv	ft_two_arg(char *argv)
 	t_argv	arg;
 
 	ft_bzero(&arg, sizeof(arg));
-	printf("IP is : %s\n", argv);
 	arg.flagv = 0;
 	arg.icycle = 100;
 	if (ft_is_ip(argv))
@@ -123,6 +122,7 @@ static t_argv	ft_two_arg(char *argv)
 	else
 	{
 		ft_resolve_name_addr(&arg.binip, argv);
+		arg.strip = argv;
 		return (arg);
 	}
 	ft_exit(RED, "Error unknow argument!", 1);
@@ -142,11 +142,12 @@ t_argv  ft_parsing(int argc, char **argv)
 		return (ft_two_arg(argv[1]));
 	for (int i = 1; i < argc; i ++)
 	{
-		if (!ft_strcmp(argv[i], "-v") && !arg.flagv)
-			arg.flagv = 0;
-		else if (!ft_strcmp(argv[i], "-c") && !c)
+		printf("I : %d\n", i);
+		if (ft_strcmp(argv[i], "-v")== 0 && !arg.flagv)
+			arg.flagv = 1;
+		else if (ft_strcmp(argv[i], "-c") == 0 && !c)
 			c = i;
-		else if (ft_isInt(argv[i]) && !arg.icycle)
+		else if (ft_isint(argv[i]) && !arg.icycle)
 			arg.icycle = i;
 		else if (!ip)
 		{
@@ -164,10 +165,13 @@ t_argv  ft_parsing(int argc, char **argv)
 		else
 			ft_exit(RED, "Unknow argument!", 1);
 	}
-	if (!(arg.icycle && c))
+	if ((arg.icycle && !c) || (!arg.icycle && c))
 		ft_exit(RED, "Unknow argument! Try ./ft_ping --help", 1);
 	if (!ip)
 		ft_exit(RED, "Ip adresse is missing!", 1);
-	arg.icycle = ft_atoi(argv[arg.icycle]);
+	if (arg.icycle)
+		arg.icycle = ft_atoi(argv[arg.icycle]);
+	else
+		arg.icycle = 100;
 	return (arg);    
 }

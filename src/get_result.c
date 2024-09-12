@@ -3,8 +3,11 @@
 
 static double  ft_get_min(t_result *ptr)
 {
-	double  min_value = 1000000;
+	double  min_value;
 
+	if (!ptr)
+		return (0);
+	min_value = ptr->time;
 	while (ptr)
 	{
 		if (ptr->time < min_value)
@@ -16,8 +19,11 @@ static double  ft_get_min(t_result *ptr)
 
 static double  ft_get_max(t_result *ptr)
 {
-	double  max_value = -1;
+	double  max_value;
 
+	if (!ptr)
+		return (0);
+	max_value = ptr->time;
 	while (ptr)
 	{
 		if (ptr->time > max_value)
@@ -53,6 +59,7 @@ static double  ft_get_mdev(t_result *ptr, double avrg)
 	if (!ptr)
 		return (0);
 	tmp = 0;
+	i = 0;
 	while (ptr)
 	{
 		i ++;
@@ -85,6 +92,7 @@ static unsigned int    get_list_size(t_result *ptr, int argv)
 {
 	unsigned int    i;
 
+	i = 0;
 	while (ptr)
 	{
 		if (ptr->icmptype == 0 && argv)

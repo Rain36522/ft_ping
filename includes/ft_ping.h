@@ -64,7 +64,7 @@ extern t_argv   strctargv;
 
 
 
-void    ft_exit(char *color, char *str, int i);
+void	ft_exit(char *color, char *str, int i);
 void	ft_exit_fd(char *color, char *str, int fd, int i);
 void	sig_handler(int sig);
 

@@ -79,7 +79,7 @@ static int ft_read_msg(t_result *result, char *buffer, int len, int argv, double
 		return (ft_echo_reply(icmpheader, result, len, iphdr, start_time));
 	else
 		printf("%sUnknow echo request!%s", ORANGE, RESETN);
-	return (1);
+	return (0);
 }
 
 void	ft_recv_ping(int socketfd, t_result *result, int argv, double start_time)
