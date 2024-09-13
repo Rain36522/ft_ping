@@ -34,18 +34,23 @@ int	ft_type3(int icode)
 	return (0);
 }
 
-int	ft_echo_reply(struct icmphdr *icmpheader, t_result *result, int len, struct iphdr *iphdr, double start)
+int	ft_echo_reply(struct icmphdr *icmpheader, t_result *result, int len, struct iphdr *iphdr, double start, int argv)
 {
     int             sequence;
+	int				id;
     struct in_addr  addr;
     char            ip[15];
 
 	(void) result;
 
     sequence = ntohs(icmpheader->un.echo.sequence);
+	id = ntohs(icmpheader->un.echo.id);
 	addr.s_addr = iphdr->saddr;
     inet_ntop(AF_INET, &addr, ip, sizeof(ip));
-    printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", len, ip, sequence, iphdr->ttl, get_time_ms() - start);
+	if (argv)
+		printf("%d bytes from %s: icmp_seq=%d ident=%d ttl=%d time=%.3f ms\n", len, ip, sequence, id, iphdr->ttl, get_time_ms() - start);
+	else
+    	printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", len, ip, sequence, iphdr->ttl, get_time_ms() - start);
 	return (1);
 }
 
@@ -70,13 +75,9 @@ static int ft_read_msg(t_result *result, char *buffer, int len, int argv, double
 	else if (type == 12)
 		printf("%sParametre problem%s", YELLOW, RESETN);
 	else if (type == 8)
-	{
-		if (argv)
-			printf("%sEcho request!%s", YELLOW, RESETN);
 		return (0);
-	}
 	else if (type == 0)
-		return (ft_echo_reply(icmpheader, result, len, iphdr, start_time));
+		return (ft_echo_reply(icmpheader, result, len, iphdr, start_time, argv));
 	else
 		printf("%sUnknow echo request!%s", ORANGE, RESETN);
 	return (0);

@@ -142,9 +142,8 @@ t_argv  ft_parsing(int argc, char **argv)
 		return (ft_two_arg(argv[1]));
 	for (int i = 1; i < argc; i ++)
 	{
-		printf("I : %d\n", i);
 		if (ft_strcmp(argv[i], "-v")== 0 && !arg.flagv)
-			arg.flagv = 1;
+			arg.flagv = (int)getpid();
 		else if (ft_strcmp(argv[i], "-c") == 0 && !c)
 			c = i;
 		else if (ft_isint(argv[i]) && !arg.icycle)

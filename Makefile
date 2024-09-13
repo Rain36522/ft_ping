@@ -31,11 +31,11 @@ objet/%.o: src/%.c
 
 clean:
 	@make clean -C libft/
-	@rm -rf objet
+	@rm -rf objet/
 
 fclean:
 	@make fclean -C libft/
-	@rm -f objet/*.o
+	@rm -rf objet/
 	@rm -f $(NAME)
 
 re: fclean all

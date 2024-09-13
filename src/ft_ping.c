@@ -60,7 +60,7 @@ t_result	ft_loop_ping(int icycle, struct sockaddr_in destaddr, struct icmp icmpH
 			fprintf(stderr, "Error sending request ...\n");
 		else
 			ft_recv_ping(socketfd, &result, argv, start_time);
-		usleep(300000);
+		usleep(900000);
 		sequence ++;
 	}
 	return (result);

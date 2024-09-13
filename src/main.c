@@ -31,6 +31,8 @@ int main(int argc, char **argv)
 {
 	if (argc == 2 && !ft_strcmp(argv[1], "--help"))
 		ft_print_help();
+	else if (argc == 2 && ft_strcmp("-V", argv[1]) == 0)
+		ft_exit(BLUE, "Version 1.0", 0);
 	else if (getuid() != 0)
 		ft_exit(ORANGE, "The program must be run as root!\n", 1);
 	ft_bzero(&strctargv, sizeof(strctargv));
