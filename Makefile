@@ -40,4 +40,8 @@ fclean:
 
 re: fclean all
 
-.PHONY : fclean re all header 
+init:
+	git submodule init
+	git submodule update
+
+.PHONY : fclean re all header init

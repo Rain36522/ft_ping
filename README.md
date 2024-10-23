@@ -8,6 +8,7 @@ This project introduces the ICMP protocol by reproducing the basic functionality
    ```bash
    git clone https://github.com/Rain36522/ft_ping.git
    cd ft_ping
+   make init
    ```
 2. Compile the project:
    ```bash
